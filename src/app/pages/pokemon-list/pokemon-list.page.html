@@ -1,13 +1,26 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>pokemonList</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
+<ion-content (ionInfinite)="loadMore($event)">
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">pokemonList</ion-title>
     </ion-toolbar>
   </ion-header>
+  <ion-searchbar [(ngModel)]="searchText" (ionChange)="filterPokemons()"></ion-searchbar>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6" *ngFor="let pokemon of filteredPokemons" (click)="openDetails(pokemon)">
+        <ion-card>
+          <img [src]="pokemon.image">
+          <ion-card-content>
+            <ion-card-title>{{ pokemon.name | titlecase }}</ion-card-title>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadMore($event)">
+    <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Carregando mais pokémons...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 </ion-content>
