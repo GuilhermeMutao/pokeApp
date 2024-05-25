@@ -19,7 +19,7 @@ interface PokemonSummary {
   image: string;
 }
 
-const API_URL = 'https://pokeapi.co/api/v2/pokemon';
+const API_URL = 'https://pokeapi.co/api/v2';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +28,7 @@ export class PokemonService {
   constructor(private http: HttpClient) { }
 
   getPokemonDetails(id: number): Observable<PokemonDetails> {
-    return this.http.get<PokemonDetails>(`${API_URL}/${id}`).pipe(
+    return this.http.get<PokemonDetails>(`${API_URL}/pokemon/${id}`).pipe(
       map((pokemonDetails: any) => ({
         id: pokemonDetails.id,
         name: pokemonDetails.name,
@@ -46,34 +46,40 @@ export class PokemonService {
   }
 
   getPokemons(limit: number, offset: number, searchText: string): Observable<PokemonSummary[]> {
-  return this.http.get<any[]>(`${API_URL}?limit=${limit}&offset=${offset}`).pipe(
-    switchMap((response: any): Observable<PokemonSummary[]> => {
-      if (response && response.results) {
-        const requests = response.results.map((pokemon: any) => 
-          this.http.get(pokemon.url).pipe(
-            map((pokemonDetails: any) => ({
-              id: pokemonDetails.id,
-              name: pokemonDetails.name,
-              image: pokemonDetails.sprites.front_default
-            }))
-          )
-        );
-        return forkJoin<PokemonSummary[]>(requests);
-      } else {
+    return this.http.get<any[]>(`${API_URL}/pokemon?limit=${limit}&offset=${offset}`).pipe(
+      switchMap((response: any): Observable<PokemonSummary[]> => {
+        if (response && response.results) {
+          const requests = response.results.map((pokemon: any) =>
+            this.http.get(pokemon.url).pipe(
+              map((pokemonDetails: any) => ({
+                id: pokemonDetails.id,
+                name: pokemonDetails.name,
+                image: pokemonDetails.sprites.front_default
+              }))
+            )
+          );
+          return forkJoin<PokemonSummary[]>(requests);
+        } else {
+          return of([]);
+        }
+      }),
+      map((pokemons: PokemonSummary[]) => {
+        if (searchText) {
+          return pokemons.filter((pokemon: PokemonSummary) => pokemon.name.toLowerCase().includes(searchText.toLowerCase()));
+        } else {
+          return pokemons;
+        }
+      }),
+      catchError(error => {
+        console.error('Error fetching Pokemons', error);
         return of([]);
-      }
-    }),
-    map((pokemons: PokemonSummary[]) => {
-      if (searchText) {
-        return pokemons.filter((pokemon: PokemonSummary) => pokemon.name.toLowerCase().includes(searchText.toLowerCase()));
-      } else {
-        return pokemons;
-      }
-    }),
-    catchError(error => {
-      console.error('Error fetching Pokemons', error);
-      return of([]);
-    })
-  );
-}
+      })
+    );
+  }
+
+  getTotalPokemons(): Observable<number> {
+    return this.http.get<{ count: number }>(`${API_URL}/pokemon`).pipe(
+      map(response => response.count)
+    );
+  }
 }

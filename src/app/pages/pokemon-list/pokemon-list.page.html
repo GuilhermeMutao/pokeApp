@@ -12,7 +12,7 @@
         <ion-card>
           <img [src]="pokemon.image">
           <ion-card-content>
-            <ion-card-title>{{ pokemon.name | titlecase }}</ion-card-title>
+            <ion-card-title>{{ pokemon.name | friendlyName }}</ion-card-title>
           </ion-card-content>
         </ion-card>
       </ion-col>

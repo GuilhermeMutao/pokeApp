@@ -10,16 +10,21 @@ import { Router } from '@angular/router';
 export class PokemonListPage implements OnInit {
   pokemons: any[] = [];
   filteredPokemons: any[] = [];
-  limit: number = 200;
+  limit: number = 1000;
   offset: number = 0;
+  total: number = 0;
   searchText: string = '';
 
   constructor(private pokemonService: PokemonService, private router: Router) { }
 
   ngOnInit() {
-    this.loadPokemons();
+    this.pokemonService.getTotalPokemons().subscribe(total => {
+      this.total = total;
+      this.limit = this.total;
+      this.loadPokemons();
+    });
   }
-
+  
   loadPokemons() {
     this.pokemonService.getPokemons(this.limit, this.offset, this.searchText).subscribe(result => {
       this.pokemons = result;
@@ -36,7 +41,7 @@ export class PokemonListPage implements OnInit {
       this.filteredPokemons = [...this.pokemons];
       event.target.complete();
   
-      if (this.pokemons.length >= this.pokemons.length) {
+      if (this.pokemons.length >= this.total) {
         event.target.disabled = true;
       }
     }, error => {
