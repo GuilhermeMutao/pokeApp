@@ -57,4 +57,8 @@ export class PokemonListPage implements OnInit {
   filterPokemons() {
     this.filteredPokemons = this.pokemons.filter(pokemon => pokemon.name.includes(this.searchText));
   }
+  isNameTooLong(name: string): boolean {
+    const maxLength = 10;
+    return name.length > maxLength;
+  }
 }
