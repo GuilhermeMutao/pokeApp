@@ -1,0 +1,50 @@
+
+.pokemon-details {
+  position: relative;
+}
+
+.pokemon-details::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: currentColor;
+  background: linear-gradient(to top right, currentColor, transparent);
+  opacity: 0.2;
+  transition: opacity 1s ease;
+}
+
+.pokemon-details:hover::before {
+  opacity: 0;
+}
+
+ion-card ion-item {
+  --background: transparent !important;
+}
+
+.type-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.type-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 50px;
+  margin: 5px;
+  border-radius: 10px;
+  background-color: var(--ion-color-primary);
+  color: white;
+  font-family: 'PixelFont', sans-serif;
+}
+
+.type-card ion-label {
+  text-align: center;
+}

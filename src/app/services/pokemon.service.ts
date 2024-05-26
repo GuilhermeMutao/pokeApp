@@ -11,6 +11,7 @@ interface PokemonDetails {
   types: string[];
   stats: { name: string; value: number }[];
   moves: string[];
+  color: string;
 }
 
 interface PokemonSummary {
@@ -30,15 +31,20 @@ export class PokemonService {
 
   getPokemonDetails(id: number): Observable<PokemonDetails> {
     return this.http.get<PokemonDetails>(`${API_URL}/pokemon/${id}`).pipe(
-      map((pokemonDetails: any) => ({
-        id: pokemonDetails.id,
-        name: pokemonDetails.name,
-        image: pokemonDetails.sprites.front_default,
-        abilities: pokemonDetails.abilities.map((a: any) => a.ability.name),
-        types: pokemonDetails.types.map((t: any) => t.type.name),
-        stats: pokemonDetails.stats.map((s: any) => ({ name: s.stat.name, value: s.base_stat })),
-        moves: pokemonDetails.moves.map((m: any) => m.move.name)
-      })),
+      switchMap((pokemonDetails: any) => {
+        return this.getPokemonColor(id).pipe(
+          map((color: string) => ({
+            id: pokemonDetails.id,
+            name: pokemonDetails.name,
+            image: pokemonDetails.sprites.front_default,
+            abilities: pokemonDetails.abilities.map((a: any) => a.ability.name),
+            types: pokemonDetails.types.map((t: any) => t.type.name),
+            stats: pokemonDetails.stats.map((s: any) => ({ name: s.stat.name, value: s.base_stat })),
+            moves: pokemonDetails.moves.map((m: any) => m.move.name),
+            color: color
+          }))
+        );
+      }),
       catchError(error => {
         console.error('Error fetching Pokemon details', error);
         return throwError(error);
