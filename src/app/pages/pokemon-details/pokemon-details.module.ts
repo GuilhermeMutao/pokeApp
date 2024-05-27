@@ -1,9 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FriendlyNamePipe } from '../../utils/friendly-name.pipe';
+import { SharedModule } from '../../shared.module';
 import { IonicModule } from '@ionic/angular';
-
 import { PokemonDetailsPageRoutingModule } from './pokemon-details-routing.module';
 
 import { PokemonDetailsPage } from './pokemon-details.page';
@@ -13,8 +12,9 @@ import { PokemonDetailsPage } from './pokemon-details.page';
     CommonModule,
     FormsModule,
     IonicModule,
-    PokemonDetailsPageRoutingModule
+    PokemonDetailsPageRoutingModule,
+    SharedModule
   ],
-  declarations: [PokemonDetailsPage, FriendlyNamePipe]
+  declarations: [PokemonDetailsPage]
 })
 export class PokemonDetailsPageModule {}
