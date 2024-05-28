@@ -23,16 +23,10 @@
             </ion-card>
           </div>
           <ion-card-header>
-            <ion-card-subtitle>#{{ pokemon.id }}</ion-card-subtitle>
             <ion-card-title>{{ pokemon.name | friendlyName }}</ion-card-title>
+            <ion-card-subtitle>#{{ pokemon.id }}</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-            <ion-list-header>Abilities</ion-list-header>
-            <ion-row>
-              <ion-chip *ngFor="let ability of pokemon.abilities" color="primary">
-                <ion-label>{{ ability | friendlyName }}</ion-label>
-              </ion-chip>
-            </ion-row>
             <ion-list-header>Stats</ion-list-header>
             <ion-item *ngFor="let stat of pokemon.stats">
               <ion-grid>
@@ -48,6 +42,18 @@
                 </ion-row>
               </ion-grid>
             </ion-item>
+            <ion-list-header>Abilities</ion-list-header>
+            <ion-row>
+              <ion-chip *ngFor="let ability of pokemon.abilities" color="primary">
+                <ion-label>{{ ability | friendlyName }}</ion-label>
+              </ion-chip>
+            </ion-row>
+            <ion-list-header>Moves</ion-list-header>
+            <ion-row>
+              <ion-chip *ngFor="let move of pokemon.moves" color="primary">
+                <ion-label>{{ move | friendlyName }}</ion-label>
+              </ion-chip>
+            </ion-row>
           </ion-card-content>
         </ion-card>
       </ion-col>
