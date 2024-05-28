@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { PokemonService } from '../../services/pokemon.service';
 import { Router } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
+import { IonContent } from '@ionic/angular';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -19,15 +19,16 @@ export class PokemonListPage implements OnInit, OnDestroy {
   searchText: string = '';
   favorites: any[] = [];
   private unsubscribe$ = new Subject<void>();
-
+  
   isLoading = new BehaviorSubject<boolean>(false);
   isLoadingFavorites = new BehaviorSubject<boolean>(false);
   showFavorites: boolean = false;
+  @ViewChild(IonContent, { static: false }) content!: IonContent;
+  showScrollTopButton = false;
 
   constructor(
     private pokemonService: PokemonService,
     private router: Router,
-    private loadingController: LoadingController
   ) { }
 
   async ngOnInit() {
@@ -126,5 +127,15 @@ export class PokemonListPage implements OnInit, OnDestroy {
   isNameTooLong(name: string): boolean {
     const maxLength = 10;
     return name.length > maxLength;
+  }
+
+  checkScroll(event: any) {
+    console.log('checkScroll foi chamado');
+    const scrollTop = event.detail.scrollTop;
+    this.showScrollTopButton = scrollTop > 1000;
+  }
+  
+  scrollTop() {
+    this.content.scrollToTop(1500);
   }
 }

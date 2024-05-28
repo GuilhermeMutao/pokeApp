@@ -1,9 +1,9 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title size="large">Pokemons</ion-title>
+    <ion-title size="large">Pokémons</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content (ionInfinite)="loadMore($event)">
+<ion-content [scrollEvents]="true" (ionScroll)="checkScroll($event)">
   <ion-grid>
     <ion-row>
       <ion-col size="8">
@@ -35,5 +35,9 @@
       </ion-col>
     </ion-row>
   </ion-grid>
-
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="showScrollTopButton">
+    <ion-fab-button (click)="scrollTop()">
+      <ion-icon name="arrow-up"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
