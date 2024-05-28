@@ -18,3 +18,16 @@
 .pokemon-card:hover::before {
   opacity: 0;
 }
+
+.favorite-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: white;
+}
+
+@media (max-width: 600px) {
+  ion-card-title {
+    font-size: 1.2em; 
+  }
+}

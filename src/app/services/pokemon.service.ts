@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { of, Observable, forkJoin, throwError } from 'rxjs';
-import { map, switchMap, catchError, mergeMap } from 'rxjs/operators';
+import { map, switchMap, catchError, mergeMap, tap, pluck } from 'rxjs/operators';
 
 interface PokemonDetails {
   id: number;
@@ -19,6 +19,7 @@ interface PokemonSummary {
   name: string;
   image: string;
   color: string;
+  isFavorite?: boolean;
 }
 
 const API_URL = 'https://pokeapi.co/api/v2';
@@ -45,10 +46,7 @@ export class PokemonService {
           }))
         );
       }),
-      catchError(error => {
-        console.error('Error fetching Pokemon details', error);
-        return throwError(error);
-      })
+      catchError(this.handleError('getPokemonDetails'))
     );
   }
 
@@ -60,10 +58,7 @@ export class PokemonService {
         }
 
         return this.http.get<any[]>(`${API_URL}/pokemon?limit=${limit}&offset=${offset}`).pipe(
-          catchError(error => {
-            console.error('Error fetching Pokemon list', error);
-            return of([]);
-          }),
+          catchError(this.handleError('getPokemons')),
           switchMap((response: any): Observable<PokemonSummary[]> => {
             if (response && response.results) {
               const requests = response.results.map((pokemon: any) => {
@@ -72,28 +67,21 @@ export class PokemonService {
                   return of(null);
                 } else {
                   return this.http.get(pokemon.url).pipe(
-                    catchError(error => {
-                      console.error('Error fetching Pokemon details', error);
-                      return of(null);
-                    }),
+                    catchError(this.handleError('getPokemons')),
                     mergeMap((details: any) => {
                       if (details && details.id && details.name && details.sprites && details.sprites.front_default) {
                         return this.getPokemonColor(id).pipe(
-                          map((color: string) => ({
-                            id: details.id,
-                            name: details.name,
-                            image: details.sprites.front_default,
-                            color: color
-                          })),
-                          catchError(error => {
-                            console.error('Error fetching Pokemon color', error);
-                            return of({
+                          map((color: string) => {
+                            const favoritePokemons = this.getFavoritePokemonsFromStorage();
+                            return {
                               id: details.id,
                               name: details.name,
                               image: details.sprites.front_default,
-                              color: 'unknown'
-                            });
-                          })
+                              color: color,
+                              isFavorite: !!favoritePokemons[details.id]
+                            };
+                          }),
+                          catchError(this.handleError('getPokemons'))
                         );
                       } else {
                         console.error('Invalid Pokemon details', details);
@@ -117,28 +105,56 @@ export class PokemonService {
               return pokemons;
             }
           }),
-          catchError(error => {
-            console.error('Error fetching Pokemons', error);
-            return of([]);
-          })
+          catchError(this.handleError('getPokemons'))
         );
       })
     );
   }
 
+  pokemons: PokemonSummary[] = [];
+
+  toggleFavorite(pokemon: PokemonSummary) {
+    pokemon.isFavorite = !pokemon.isFavorite;
+    this.updateFavoritePokemons(pokemon);
+  }
+
+  updateFavoritePokemons(pokemon: PokemonSummary) {
+    let favorites = this.getFavoritePokemonsFromStorage();
+    if (pokemon.isFavorite) {
+      favorites[pokemon.id] = pokemon;
+    } else {
+      delete favorites[pokemon.id];
+    }
+    localStorage.setItem('favoritePokemons', JSON.stringify(favorites));
+  }
+
+  getFavoritePokemonsFromStorage(): { [id: number]: PokemonSummary } {
+    let favorites = localStorage.getItem('favoritePokemons');
+    return favorites ? JSON.parse(favorites) : {};
+  }
+
+  getFavoritePokemons(): PokemonSummary[] {
+    let favorites = this.getFavoritePokemonsFromStorage();
+    return Object.values(favorites);
+  }
+
   getTotalPokemons(): Observable<number> {
     return this.http.get<{ count: number }>(`${API_URL}/pokemon`).pipe(
-      map(response => response.count)
+      pluck('count')
     );
   }
 
   getPokemonColor(id: number) {
     return this.http.get(`${API_URL}/pokemon-species/${id}`).pipe(
-      map((species: any) => species.color.name),
-      catchError(error => {
-        console.error('Error fetching Pokemon color', error);
-        return of('unknown');
-      })
+      pluck('color', 'name'),
+      catchError(this.handleError('getPokemonColor'))
     );
+  }
+
+  private handleError(operation = 'operation') {
+    return (error: any): Observable<any> => {
+      console.error(`${operation} failed: ${error.message}`);
+      return throwError(error);
+    };
   }
 }
