@@ -17,6 +17,7 @@ export class PokemonListPage implements OnInit, OnDestroy {
   offset: number = 0;
   total: number = 0;
   searchText: string = '';
+  favorites: any[] = [];
   private unsubscribe$ = new Subject<void>();
 
   isLoading = new BehaviorSubject<boolean>(false);
@@ -30,10 +31,17 @@ export class PokemonListPage implements OnInit, OnDestroy {
   ) { }
 
   async ngOnInit() {
-    this.total = await this.pokemonService.getTotalPokemons().toPromise() || 0; 
+    this.total = await this.pokemonService.getTotalPokemons().toPromise() || 0;
     this.limit = this.total;
     this.offset += this.limit;
     await this.loadPokemons();
+    let storedFavorites = localStorage.getItem('favorites');
+    this.favorites = storedFavorites && storedFavorites.length > 0 ? JSON.parse(storedFavorites) : [];
+    if (Array.isArray(this.favorites)) {
+      this.pokemons.forEach(pokemon => {
+        pokemon.isFavorite = this.favorites.includes(pokemon.id.toString());
+      });
+    }
   }
 
   ngOnDestroy() {
@@ -41,7 +49,13 @@ export class PokemonListPage implements OnInit, OnDestroy {
     this.unsubscribe$.complete();
   }
 
+  pokemonsLoaded = false;
+
   async loadPokemons(isFavorites: boolean = false) {
+    if (this.pokemonsLoaded) {
+      return;
+    }
+
     this.isLoading.next(true);
     this.isLoadingFavorites.next(isFavorites);
 
@@ -50,8 +64,9 @@ export class PokemonListPage implements OnInit, OnDestroy {
         .pipe(takeUntil(this.unsubscribe$))
         .toPromise();
 
-      this.pokemons = pokemons || []; 
+      this.pokemons = pokemons || [];
       this.filterPokemons(isFavorites);
+      this.pokemonsLoaded = true;
     } catch (error) {
       console.error('Error loading Pokemons', error);
     } finally {
@@ -105,11 +120,7 @@ export class PokemonListPage implements OnInit, OnDestroy {
   }
 
   filterPokemons(isFavorites: boolean = false) {
-    if (isFavorites) {
-      this.filteredPokemons = this.pokemons.filter(pokemon => pokemon.isFavorite);
-    } else {
-      this.filteredPokemons = this.pokemons.filter(pokemon => pokemon.name.toLowerCase().includes(this.searchText.toLowerCase()));
-    }
+    this.filteredPokemons = this.pokemonService.getFilteredPokemons(isFavorites, this.pokemons, this.searchText);
   }
 
   isNameTooLong(name: string): boolean {

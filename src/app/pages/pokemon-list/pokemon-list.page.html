@@ -10,7 +10,7 @@
         <ion-searchbar [(ngModel)]="searchText" (ionChange)="filterPokemons()"></ion-searchbar>
       </ion-col>
       <ion-col size="4">
-        <ion-button fill="outline" color="primary" (click)="toggleShowFavorites()">
+        <ion-button [fill]="showFavorites ? 'solid' : 'outline'" color="primary" (click)="toggleShowFavorites()">
           <ion-icon name="heart" slot="start"></ion-icon>
           Favorites
         </ion-button>
@@ -36,8 +36,4 @@
     </ion-row>
   </ion-grid>
 
-  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadMore($event)">
-    <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Carregando mais pokémons...">
-    </ion-infinite-scroll-content>
-  </ion-infinite-scroll>
 </ion-content>

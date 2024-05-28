@@ -116,6 +116,7 @@ export class PokemonService {
   toggleFavorite(pokemon: PokemonSummary) {
     pokemon.isFavorite = !pokemon.isFavorite;
     this.updateFavoritePokemons(pokemon);
+    localStorage.setItem('favorites', JSON.stringify(this.getFavoritePokemonsFromStorage()));
   }
 
   updateFavoritePokemons(pokemon: PokemonSummary) {
@@ -149,6 +150,14 @@ export class PokemonService {
       pluck('color', 'name'),
       catchError(this.handleError('getPokemonColor'))
     );
+  }
+
+  getFilteredPokemons(isFavorites: boolean, pokemons: any[], searchText: string) {
+    if (isFavorites) {
+      return pokemons.filter(pokemon => pokemon.isFavorite);
+    } else {
+      return pokemons.filter(pokemon => pokemon.name.toLowerCase().includes(searchText.toLowerCase()));
+    }
   }
 
   private handleError(operation = 'operation') {
