@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { SplashScreenService } from '../../services/splash-screen.service';
 
 @Component({
   selector: 'app-pokemon-list',
@@ -29,6 +30,7 @@ export class PokemonListPage implements OnInit, OnDestroy {
   constructor(
     private pokemonService: PokemonService,
     private router: Router,
+    private splashScreenService: SplashScreenService,
   ) { }
 
   async ngOnInit() {
@@ -68,6 +70,7 @@ export class PokemonListPage implements OnInit, OnDestroy {
       this.pokemons = pokemons || [];
       this.filterPokemons(isFavorites);
       this.pokemonsLoaded = true;
+      this.splashScreenService.shouldShowSplash$.next(false);
     } catch (error) {
       console.error('Error loading Pokemons', error);
     } finally {

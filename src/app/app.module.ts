@@ -5,10 +5,13 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
 import { PokemonService } from './services/pokemon.service';
+import { SplashScreenComponent } from './splash-screen/splash-screen.component'; 
+
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    SplashScreenComponent
   ],
   imports: [
     BrowserModule,

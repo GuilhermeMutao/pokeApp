@@ -1,3 +1,4 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <app-splash-screen *ngIf="show"></app-splash-screen>
+  <ion-router-outlet *ngIf="!show"></ion-router-outlet>
 </ion-app>
